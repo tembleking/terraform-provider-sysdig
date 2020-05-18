@@ -31,9 +31,6 @@ jobs:
       - name: Check formatting
         run: make fmtcheck
       
-      - name: Check for errors
-        run: make errcheck
-      
       - name: Check build
         run: make build
         
@@ -42,4 +39,7 @@ jobs:
         
       - name: Execute acceptance tests
         run: make testacc
+        env:
+          SYSDIG_MONITOR_API_TOKEN: ${{ secrets.SYSDIG_MONITOR_API_TOKEN }}
+          SYSDIG_SECURE_API_TOKEN: ${{ secrets.SYSDIG_SECURE_API_TOKEN }}
         
