@@ -40,11 +40,15 @@ jobs:
           - os: linux
             arch: mips
           - os: linux
+            arch: mips64
+          - os: linux
             arch: mips64le
           - os: linux
             arch: mipsle
           - os: linux
             arch: ppc64
+          - os: linux
+            arch: ppc64le
           - os: linux
             arch: riscv64
           - os: linux
