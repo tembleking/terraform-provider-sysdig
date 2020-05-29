@@ -7,39 +7,68 @@ on:
 name: Release provider
 
 jobs:
-  build:
-    name: Release provider
+  create-release:
+    name: Create release
     runs-on: ubuntu-latest
+    outputs:
+      upload_url: ${{ steps.create_release.outputs.upload_url }}
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
-      
-      - name: Build project # This would actually build your project, using zip for an example artifact
-        run: make release
-        continue-on-error: true
-        
       - name: Create Release
-        uses: softprops/action-gh-release@b7e450da2a4b4cb4bfbae528f788167786cfcedf
+        id: create_release
+        uses: actions/create-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          files: |
-            terraform-provider-sysdig-darwin-386.tar.gz
-            terraform-provider-sysdig-darwin-amd64.tar.gz
-            terraform-provider-sysdig-linux-386.tar.gz
-            terraform-provider-sysdig-linux-amd64.tar.gz
-            terraform-provider-sysdig-linux-arm64.tar.gz
-            terraform-provider-sysdig-linux-arm.tar.gz
-            terraform-provider-sysdig-linux-mips64le.tar.gz
-            terraform-provider-sysdig-linux-mips64.tar.gz
-            terraform-provider-sysdig-linux-mipsle.tar.gz
-            terraform-provider-sysdig-linux-mips.tar.gz
-            terraform-provider-sysdig-linux-ppc64le.tar.gz
-            terraform-provider-sysdig-linux-ppc64.tar.gz
-            terraform-provider-sysdig-linux-riscv64.tar.gz
-            terraform-provider-sysdig-linux-s390x.tar.gz
-            terraform-provider-sysdig-windows-386.tar.gz
-            terraform-provider-sysdig-windows-amd64.tar.gz
-            terraform-provider-sysdig-windows-arm.tar.gz
+          tag_name: ${{ github.ref }}
+          release_name: ${{ github.ref }}
           draft: true
           prerelease: false
+
+  build:
+    name: Build provider
+    runs-on: ubuntu-latest
+    needs: [create-release]
+    strategy:
+      matrix:
+        os: [darwin, linux, windows]
+        arch: [386, amd64]
+        include:
+          - os: linux
+            arch: arm
+          - os: linux
+            arch: arm64
+          - os: linux
+            arch: mips
+          - os: linux
+            arch: mips64le
+          - os: linux
+            arch: mipsle
+          - os: linux
+            arch: ppc64
+          - os: linux
+            arch: riscv64
+          - os: linux
+            arch: s390x
+          - os: windows
+            arch: arm
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+    
+      - name: Build project # This would actually build your project, using zip for an example artifact
+        run: |
+          VERSION=$(shell [ ! -z `git tag -l --contains HEAD` ] && git tag -l --contains HEAD || git rev-parse --short HEAD)
+          GOOS=${{ matrix.os }} GOARCH=${{ matrix.arch }} go build -o terraform-provider-sysdig_$(VERSION)
+          tar -czf terraform-provider-sysdig-${{ matrix.os }}-${{ matrix.arch }} .tar.gz terraform-provider-sysdig_$(VERSION) --remove-files
+        
+  
+      - name: Upload Release Asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ needs.create-release.outputs.upload_url }} 
+          asset_path: ./terraform-provider-sysdig-${{ matrix.os }}-${{ matrix.arch }}.tar.gz
+          asset_name: terraform-provider-sysdig-${{ matrix.os }}-${{ matrix.arch }}.tar.gz
+          asset_content_type: application/tar+gzip
+          
