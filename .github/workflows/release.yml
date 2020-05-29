@@ -59,7 +59,7 @@ jobs:
         run: |
           VERSION=$([ -z "`git tag -l --contains HEAD`" ] && git rev-parse --short HEAD || git tag -l --contains HEAD)
           GOOS=${{ matrix.os }} GOARCH=${{ matrix.arch }} go build -o terraform-provider-sysdig_$VERSION
-          tar -czf terraform-provider-sysdig-${{ matrix.os }}-${{ matrix.arch }} .tar.gz terraform-provider-sysdig_$VERSION --remove-files
+          tar -czf "terraform-provider-sysdig-${{ matrix.os }}-${{ matrix.arch }}.tar.gz" terraform-provider-sysdig_$VERSION --remove-files
         
   
       - name: Upload Release Asset
