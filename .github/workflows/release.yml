@@ -57,7 +57,7 @@ jobs:
     
       - name: Build project # This would actually build your project, using zip for an example artifact
         run: |
-          VERSION=$([ ! -z `git tag -l --contains HEAD` ] && git tag -l --contains HEAD || git rev-parse --short HEAD)
+          VERSION=[ ! -z `git tag -l --contains HEAD` ] && git tag -l --contains HEAD || git rev-parse --short HEAD
           GOOS=${{ matrix.os }} GOARCH=${{ matrix.arch }} go build -o terraform-provider-sysdig_$(VERSION)
           tar -czf terraform-provider-sysdig-${{ matrix.os }}-${{ matrix.arch }} .tar.gz terraform-provider-sysdig_$(VERSION) --remove-files
         
