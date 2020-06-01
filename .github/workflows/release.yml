@@ -30,31 +30,31 @@ jobs:
     needs: [create-release]
     strategy:
       matrix:
-        os: [darwin, linux, windows]
-        arch: [386, amd64]
         include:
-          - os: linux
+          - os: darwin
+            arch: amd64
+          - os: freebsd
+            arch: 386
+          - os: freebsd
+            arch: amd64
+          - os: freebsd
             arch: arm
           - os: linux
-            arch: arm64
+            arch: 386
           - os: linux
-            arch: mips
+            arch: amd64
           - os: linux
-            arch: mips64
-          - os: linux
-            arch: mips64le
-          - os: linux
-            arch: mipsle
-          - os: linux
-            arch: ppc64
-          - os: linux
-            arch: ppc64le
-          - os: linux
-            arch: riscv64
-          - os: linux
-            arch: s390x
+            arch: arm
+          - os: openbsd
+            arch: 386
+          - os: openbsd
+            arch: amd64
+          - os: solaris
+            arch: amd64
           - os: windows
-            arch: arm
+            arch: 386
+          - os: windows
+            arch: amd64
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
